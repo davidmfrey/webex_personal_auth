@@ -1,0 +1,28 @@
+{
+  "name": "token",
+  "version": "1.0.0",
+  "description": "CLI tool to authenticate with Webex APIs and store tokens",
+  "main": "dist/webex-auth.js",
+  "bin": {
+    "webex-auth": "dist/webex-auth.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/webex-auth.js",
+    "dev": "ts-node src/webex-auth.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "commander": "^14.0.0",
+    "puppeteer": "^24.17.0"
+  }
+}
