@@ -111,7 +111,7 @@ class TokenManager {
         headless: false, // Keep visible so user can sign in
         defaultViewport: null,
         args: [
-          '--start-maximized',
+          '--start-minimized',
           '--disable-web-security',
           '--disable-features=VizDisplayCompositor',
           '--allow-running-insecure-content',
@@ -168,12 +168,23 @@ class TokenManager {
         await page.click(nextButtonSelector);
         console.log('✅ Clicked Next button');
 
-        // Step 6: Focus password field
+        // Step 6: Focus password field and maximize window for user interaction
         console.log('🔍 Step 6: Focusing password field...');
         const passwordSelector = '#login-parent > div > div.display-flex.flex-direction-column.flex-value-one.size-padding-left-large.size-padding-right-large > form > label > input';
         await page.waitForSelector(passwordSelector, { timeout: 10000 });
+        
+        // Maximize window for password entry
+        console.log('🔼 Maximizing window for password entry...');
+        await page.evaluate(`() => {
+          if (window.outerHeight < window.screen.availHeight || window.outerWidth < window.screen.availWidth) {
+            window.resizeTo(window.screen.availWidth, window.screen.availHeight);
+            window.moveTo(0, 0);
+          }
+        }`);
+        
         await page.focus(passwordSelector);
         console.log('✅ Password field is now focused - you can type your password!');
+        console.log('🔼 Window has been maximized for easier interaction');
 
         console.log('🔐 Please complete your password and MFA authentication...');
         console.log('⏳ The tool will automatically continue once you finish MFA...');
@@ -191,6 +202,18 @@ class TokenManager {
         await page.waitForSelector('#trust-browser-button', { timeout: 300000 }); // 5 minutes timeout
         await page.click('#trust-browser-button');
         console.log('✅ Clicked "Yes, this is my device" button');
+        
+        // Minimize window after MFA completion
+        console.log('🔽 Minimizing window after MFA completion...');
+        await page.evaluate(`() => {
+          if (window.minimize) {
+            window.minimize();
+          } else {
+            // Fallback: move window off-screen or resize to small
+            window.resizeTo(100, 100);
+            window.moveTo(window.screen.availWidth - 100, window.screen.availHeight - 100);
+          }
+        }`);
         
         // Wait for page to redirect back to developer portal
         await new Promise(resolve => setTimeout(resolve, 3000));
