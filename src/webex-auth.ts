@@ -111,7 +111,6 @@ class TokenManager {
         headless: false, // Keep visible so user can sign in
         defaultViewport: null,
         args: [
-          '--start-minimized',
           '--disable-web-security',
           '--disable-features=VizDisplayCompositor',
           '--allow-running-insecure-content',
@@ -120,6 +119,13 @@ class TokenManager {
       });
 
       const page = await browser.newPage();
+      
+      // Minimize window immediately after launch
+      console.log('🔽 Minimizing browser window to reduce distraction...');
+      await page.evaluate(`() => {
+        window.resizeTo(200, 100);
+        window.moveTo(window.screen.availWidth - 200, window.screen.availHeight - 100);
+      }`);
       
       // Grant clipboard permissions
       const context = browser.defaultBrowserContext();
