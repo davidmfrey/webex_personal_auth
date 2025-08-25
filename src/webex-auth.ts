@@ -512,6 +512,106 @@ async function main() {
       console.log(`💡 To load token: source ~/.webex-cli/webex-env.sh`);
     });
 
+  program
+    .command('completion')
+    .description('Generate shell completion script')
+    .option('-s, --shell <shell>', 'shell type (zsh, bash, fish)', 'zsh')
+    .action((options) => {
+      const shell = options.shell.toLowerCase();
+      
+      if (shell === 'zsh') {
+        console.log(`#compdef webex-auth
+
+_webex-auth() {
+  local context state line
+  typeset -A opt_args
+
+  _arguments \\
+    '(-V --version)'{-V,--version}'[output the version number]' \\
+    '(-h --help)'{-h,--help}'[display help for command]' \\
+    '*:: :->command_or_args' && return 0
+
+  case $state in
+    command_or_args)
+      if (( CURRENT == 1 )); then
+        _values 'webex-auth commands' \\
+          'login[Automatically get your Webex Personal Access Token]' \\
+          'info[Display information about stored tokens]' \\
+          'completion[Generate shell completion script]' \\
+          'help[display help for command]'
+      else
+        case $words[1] in
+          completion)
+            _values 'shell types' \\
+              'zsh[Generate zsh completion]' \\
+              'bash[Generate bash completion]' \\
+              'fish[Generate fish completion]'
+            ;;
+          help)
+            _values 'help commands' \\
+              'login[help for login command]' \\
+              'info[help for info command]' \\
+              'completion[help for completion command]'
+            ;;
+        esac
+      fi
+      ;;
+  esac
+}
+
+_webex-auth "$@"`);
+      } else if (shell === 'bash') {
+        console.log(`_webex-auth() {
+  local cur prev opts
+  COMPREPLY=()
+  cur="\${COMP_WORDS[COMP_CWORD]}"
+  prev="\${COMP_WORDS[COMP_CWORD-1]}"
+  opts="login info completion help --version --help"
+
+  if [[ \${cur} == -* ]]; then
+    COMPREPLY=( $(compgen -W "--version --help" -- \${cur}) )
+    return 0
+  fi
+
+  if [[ \${COMP_CWORD} == 1 ]]; then
+    COMPREPLY=( $(compgen -W "\${opts}" -- \${cur}) )
+    return 0
+  fi
+
+  case "\${prev}" in
+    completion)
+      COMPREPLY=( $(compgen -W "zsh bash fish" -- \${cur}) )
+      return 0
+      ;;
+    help)
+      COMPREPLY=( $(compgen -W "login info completion" -- \${cur}) )
+      return 0
+      ;;
+    --shell|-s)
+      COMPREPLY=( $(compgen -W "zsh bash fish" -- \${cur}) )
+      return 0
+      ;;
+  esac
+}
+
+complete -F _webex-auth webex-auth`);
+      } else if (shell === 'fish') {
+        console.log(`complete -c webex-auth -f
+complete -c webex-auth -s V -l version -d "output the version number"
+complete -c webex-auth -s h -l help -d "display help for command"
+complete -c webex-auth -n "__fish_use_subcommand" -a "login" -d "Automatically get your Webex Personal Access Token"
+complete -c webex-auth -n "__fish_use_subcommand" -a "info" -d "Display information about stored tokens"
+complete -c webex-auth -n "__fish_use_subcommand" -a "completion" -d "Generate shell completion script"
+complete -c webex-auth -n "__fish_use_subcommand" -a "help" -d "display help for command"
+complete -c webex-auth -n "__fish_seen_subcommand_from completion" -s s -l shell -d "shell type" -a "zsh bash fish"
+complete -c webex-auth -n "__fish_seen_subcommand_from help" -a "login info completion"`);
+      } else {
+        console.log(`❌ Unsupported shell: ${shell}`);
+        console.log(`💡 Supported shells: zsh, bash, fish`);
+        process.exit(1);
+      }
+    });
+
   await program.parseAsync();
 }
 
